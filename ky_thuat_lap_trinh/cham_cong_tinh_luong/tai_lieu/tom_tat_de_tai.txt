@@ -1,0 +1,118 @@
+TÓM TẮT ĐỀ TÀI
+================================================================
+Đề tài: Xây dựng chương trình quản lý chấm công và tính lương
+        nhân viên bằng ngôn ngữ C (console, không UI, không database)
+
+
+CHƯƠNG 1 - MỞ ĐẦU
+----------------------------------------------------------------
+Mục tiêu: vận dụng struct, con trỏ, cấp phát động, danh sách liên
+kết, đệ quy và xử lý file trong C.
+
+Phạm vi:
+  - Doanh nghiệp nhỏ, một người dùng, không đăng nhập.
+  - Mỗi nhân viên chỉ chấm công một lần mỗi ngày.
+  - Không tính thuế, bảo hiểm, khấu trừ.
+  - Dữ liệu lưu file .txt, bảng lương xuất file .csv.
+
+
+CHƯƠNG 2 - NGÔN NGỮ C VÀ THIẾT KẾ
+----------------------------------------------------------------
+2.1. Kiến thức C sử dụng
+  struct, con trỏ (malloc/realloc/free), danh sách liên kết đơn,
+  đệ quy, đọc/ghi file.
+
+2.2. Danh sách 19 chức năng  (* = bắt buộc theo đề)
+
+  F1 Nhân viên : Thêm*, Hiển thị*, Sửa, Xoá, Tìm kiếm, Sắp xếp
+  F2 Chấm công : Chấm công theo ngày*, Sửa, Xoá, Xem lịch sử tháng
+  F3 Lương     : Lương 1 NV*, Bảng lương tháng*, Xuất CSV
+  F4 Thống kê  : Giờ công theo tháng* (đệ quy), Tổng quỹ lương,
+                 NV thiếu công
+  F5 File      : Lưu*, Đọc*, Nạp dữ liệu mẫu
+
+Cấu trúc dữ liệu:
+  - DanhSachNV: mảng động các NhanVien.
+  - NhanVien: maNV, hoTen, phongBan, chucVu, luongCoBan, phuCap,
+    dsChamCong (con trỏ đầu danh sách liên kết ChamCong).
+  - ChamCong: ngay, loai (đi làm / nghỉ phép / nghỉ không phép),
+    gioVao, gioRa, gioLam, gioThem, next.
+    Danh sách luôn sắp tăng dần theo ngày.
+
+Quy tắc tính:
+  - Thời gian làm = giờ ra - giờ vào - nghỉ trưa (12:00-13:00).
+  - Giờ làm chính = min(thời gian làm, 8)
+    Giờ làm thêm  = phần vượt quá 8 giờ.
+  - Số công: đi làm = giờ làm chính / 8
+             nghỉ phép = 1 công
+             nghỉ không phép = 0 công
+  - Công chuẩn tháng = 26, hệ số làm thêm = 1,5.
+  - LƯƠNG = (LCB/26) x số công + (LCB/208) x 1,5 x giờ OT + phụ cấp
+  - Ví dụ: LCB 7.800.000, phụ cấp 500.000, 23 công, 10 giờ OT
+           => lương = 7.962.500 đ
+
+Hàm đệ quy:
+  - tongGioThang(p, thang, nam):
+      dừng khi p == NULL;
+      trả về giờ của p (nếu đúng tháng) + tongGioThang(p->next, ...)
+  - gioLuyKe(p, den): tổng giờ từ đầu tháng đến một ngày,
+      dùng cho cột lũy kế trong bảng lịch sử.
+  - demCongThang, tongOTThang: viết đệ quy tương tự.
+
+Thuật toán khác:
+  - Chèn chấm công đúng thứ tự ngày, báo lỗi nếu trùng ngày.
+  - Xoá một nút chấm công trong danh sách liên kết.
+  - Xoá nhân viên => giải phóng toàn bộ danh sách chấm công.
+  - Sắp xếp bằng qsort; tìm theo tên bằng strstr
+    (không phân biệt hoa thường).
+
+File dữ liệu:
+  - dulieu.txt, các trường ngăn cách bằng dấu "|":
+      3                                   <- số nhân viên
+      NV001|Nguyen Van A|Ky thuat|Nhan vien|7800000|500000|2
+      01/11/2026|0|08:00|17:30            <- ngày|loại|vào|ra
+      02/11/2026|1|--:--|--:--
+  - Bảng lương: bangluong_MM_YYYY.csv
+
+Các file mã nguồn (mỗi module gồm .h và .c):
+  main.c, kieudulieu.h, nhanvien, chamcong, luong, thongke,
+  tepdulieu, tienich
+
+Menu chương trình:
+  1. Quản lý nhân viên
+  2. Chấm công
+  3. Tính lương
+  4. Thống kê
+  5. Tệp dữ liệu
+  0. Thoát (hỏi lưu dữ liệu trước khi thoát)
+
+Kế hoạch 7 giai đoạn:
+  1. Tài liệu
+  2. Kiểu dữ liệu, tiện ích, khung menu
+  3. Quản lý nhân viên
+  4. Chấm công
+  5. Lương và thống kê
+  6. Lưu/đọc file
+  7. Kiểm thử, hoàn thiện báo cáo
+
+
+CHƯƠNG 3 - KẾT QUẢ VÀ KIẾN NGHỊ
+----------------------------------------------------------------
+15 kịch bản kiểm thử: trùng mã NV, ngày sai / năm nhuận, giờ ra
+trước giờ vào, tính OT, làm nửa ngày, chấm trùng ngày, thứ tự danh
+sách, tính lương, đệ quy với tháng rỗng, xoá NV, lưu/đọc file,
+file không tồn tại, nhập chữ vào ô số, xuất CSV.
+
+Hướng phát triển:
+  - Hệ số làm thêm 150/200/300% theo Bộ luật Lao động.
+  - Bảo hiểm, thuế thu nhập cá nhân.
+  - Phân quyền người dùng.
+  - Nhập dữ liệu từ máy chấm công.
+  - Cây / bảng băm để tìm nhanh.
+  - SQLite hoặc giao diện đồ hoạ.
+
+
+PHỤ LỤC
+----------------------------------------------------------------
+Cài đặt : gcc -std=c99 -Wall -o chamcong *.c
+Sử dụng : đi theo menu 1-5; khi thoát chương trình hỏi có lưu không.

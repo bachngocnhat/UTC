@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# File chạy sau khi biên dịch
+chamcong
+*.exe
+*.o
+*.out
+
+# Dữ liệu sinh ra khi chạy chương trình
+dulieu.txt
+bangluong_*.csv
+
+# File tạm của Word
+~$*.docx
