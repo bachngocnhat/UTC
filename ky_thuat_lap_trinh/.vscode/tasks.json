@@ -1,0 +1,25 @@
+{
+  // Cmd + Shift + B: biên dịch TẤT CẢ file .c trong thư mục của file đang mở rồi chạy chương trình.
+  // (Mở một file .c bất kỳ của dự án trước khi nhấn.)
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Bien dich va chay",
+      "type": "shell",
+      "command": "gcc -std=c99 -Wall -o chamcong *.c && ./chamcong",
+      "options": { "cwd": "${fileDirname}" },
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "focus": true, "panel": "dedicated", "clear": true },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Chi bien dich",
+      "type": "shell",
+      "command": "gcc -std=c99 -Wall -o chamcong *.c",
+      "options": { "cwd": "${fileDirname}" },
+      "group": "build",
+      "presentation": { "reveal": "always", "clear": true },
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}

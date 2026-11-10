@@ -4,6 +4,7 @@
  *
  * Biên dịch: gcc -std=c99 -Wall -o chamcong *.c
  * Chạy:      ./chamcong   (Windows: chamcong.exe)
+ * Hoặc 1 lệnh gcc -std=c99 -Wall -o chamcong *.c && ./chamcong
  */
 #include <stdio.h>
 #include "kieudulieu.h"
