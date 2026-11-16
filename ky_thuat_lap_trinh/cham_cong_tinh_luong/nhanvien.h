@@ -24,7 +24,5 @@ void themNV(DanhSachNV *d);       /* F1.1 */
 void hienThiDS(DanhSachNV *d);    /* F1.2 */
 void suaNV(DanhSachNV *d);        /* F1.3 */
 void xoaNV(DanhSachNV *d);        /* F1.4 */
-void timKiemNV(DanhSachNV *d);    /* F1.5 */
-void sapXepNV(DanhSachNV *d);     /* F1.6 */
 
 #endif

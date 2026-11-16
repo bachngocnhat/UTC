@@ -6,24 +6,25 @@ Chương trình console viết bằng ngôn ngữ C (chuẩn C99), không dùng 
 
 | Nhóm | Chức năng |
 |---|---|
-| Nhân viên | Thêm, hiển thị, sửa, xoá, tìm kiếm (theo mã / tên), sắp xếp |
-| Chấm công | Chấm công theo ngày (giờ vào/ra, nghỉ phép, nghỉ không phép), sửa, xoá, xem lịch sử tháng |
-| Lương | Phiếu lương 1 nhân viên, bảng lương tháng, xuất file CSV |
-| Thống kê | Giờ công theo tháng (đệ quy), tổng quỹ lương, nhân viên thiếu công |
+| Nhân viên | Thêm, hiển thị, sửa, xoá |
+| Chấm công | Chấm công theo ngày (số giờ làm, số giờ làm thêm) |
+| Lương | Phiếu lương 1 nhân viên, bảng lương tháng |
+| Thống kê | Giờ công theo tháng (tính bằng đệ quy) |
 | Tệp | Lưu / đọc `dulieu.txt`, nạp dữ liệu mẫu (15 nhân viên, tháng 10/2026) |
 
 ## Cấu trúc dữ liệu
 
 - `DanhSachNV`: mảng động các `NhanVien` (`malloc` / `realloc`).
 - Mỗi `NhanVien` có con trỏ `dsChamCong` trỏ tới **danh sách liên kết đơn** các bản ghi `ChamCong`, sắp tăng dần theo ngày.
-- Tổng giờ công, giờ lũy kế, số công trong tháng được tính bằng **hàm đệ quy** trên danh sách liên kết (`thongke.c`).
+- Tổng giờ công lũy kế, giờ làm thêm, số công trong tháng được tính bằng **hàm đệ quy** trên danh sách liên kết (`thongke.c`).
 
 ## Công thức lương
 
 ```
 donGiaNgay = luongCoBan / 26
 donGiaGio  = donGiaNgay / 8
-Luong      = donGiaNgay * soCong + donGiaGio * 1.5 * gioOT + phuCap
+soCong     = tổng (gioLam / 8) của các ngày trong tháng
+Luong      = donGiaNgay * soCong + donGiaGio * 1.5 * gioOT
 ```
 
 ## Biên dịch và chạy
@@ -42,11 +43,11 @@ Lần đầu chạy: vào menu **5 → 3** để nạp dữ liệu mẫu, sau đ
 cham_cong_tinh_luong/
 ├── main.c            Menu chính
 ├── kieudulieu.h      Struct, hằng số
-├── tienich.c/.h      Nhập liệu có kiểm tra, xử lý ngày giờ
+├── tienich.c/.h      Nhập liệu có kiểm tra, xử lý ngày tháng
 ├── nhanvien.c/.h     Quản lý nhân viên
 ├── chamcong.c/.h     Danh sách liên kết chấm công
-├── thongke.c/.h      Hàm đệ quy, thống kê
-├── luong.c/.h        Tính lương, xuất CSV
+├── thongke.c/.h      Hàm đệ quy, thống kê giờ công
+├── luong.c/.h        Tính lương
 ├── tepdulieu.c/.h    Lưu / đọc file, dữ liệu mẫu
-└── tai_lieu/         Báo cáo (.docx) và tóm tắt đề tài
+└── tai_lieu/         Báo cáo (.docx), tóm tắt đề tài, giải thích code
 ```

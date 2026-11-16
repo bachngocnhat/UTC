@@ -5,7 +5,7 @@
  * Công thức:
  *   donGiaNgay = luongCoBan / 26
  *   donGiaGio  = donGiaNgay / 8
- *   Luong      = donGiaNgay * soCong + donGiaGio * 1.5 * gioOT + phuCap
+ *   Luong      = donGiaNgay * soCong + donGiaGio * 1.5 * gioOT
  */
 #include <stdio.h>
 #include "luong.h"
@@ -20,7 +20,7 @@ double tinhLuong(NhanVien *nv, int thang, int nam) {
     float soCong = demCongThang(nv->dsChamCong, thang, nam);
     float gioOT = tongOTThang(nv->dsChamCong, thang, nam);
 
-    return donGiaNgay * soCong + donGiaGio * HE_SO_OT * gioOT + nv->phuCap;
+    return donGiaNgay * soCong + donGiaGio * HE_SO_OT * gioOT;
 }
 
 /* ================== F3.1 LƯƠNG 1 NHÂN VIÊN ================== */
@@ -56,9 +56,8 @@ void inLuongMotNV(DanhSachNV *d) {
     printf("----------------------------------------\n");
     printf("Luong theo cong  : %15.0f VND\n", luongCong);
     printf("Luong lam them   : %15.0f VND (he so %.1f)\n", luongOT, HE_SO_OT);
-    printf("Phu cap          : %15.0f VND\n", nv->phuCap);
     printf("----------------------------------------\n");
-    printf("THUC NHAN        : %15.0f VND\n", luongCong + luongOT + nv->phuCap);
+    printf("THUC NHAN        : %15.0f VND\n", luongCong + luongOT);
 }
 
 /* ================== F3.2 BẢNG LƯƠNG THÁNG ================== */
@@ -75,60 +74,19 @@ void inBangLuong(DanhSachNV *d) {
     nhapThangNam(&thang, &nam);
 
     printf("\nBANG LUONG THANG %02d/%04d\n", thang, nam);
-    printf("%-8s %-25s %8s %8s %12s %10s %14s\n",
-           "Ma NV", "Ho ten", "So cong", "Gio OT", "Luong CB", "Phu cap", "Thuc nhan");
-    printf("------------------------------------------------------------------------------------------\n");
+    printf("%-8s %-25s %8s %8s %12s %14s\n",
+           "Ma NV", "Ho ten", "So cong", "Gio OT", "Luong CB", "Thuc nhan");
+    printf("--------------------------------------------------------------------------------\n");
     for (i = 0; i < d->soLuong; i++) {
         nv = &d->ds[i];
         luong = tinhLuong(nv, thang, nam);
         tong += luong;
-        printf("%-8s %-25s %8.2f %8.2f %12.0f %10.0f %14.0f\n",
+        printf("%-8s %-25s %8.2f %8.2f %12.0f %14.0f\n",
                nv->maNV, nv->hoTen,
                demCongThang(nv->dsChamCong, thang, nam),
                tongOTThang(nv->dsChamCong, thang, nam),
-               nv->luongCoBan, nv->phuCap, luong);
+               nv->luongCoBan, luong);
     }
-    printf("------------------------------------------------------------------------------------------\n");
-    printf("%-77s %14.0f\n", "TONG CONG", tong);
-}
-
-/* ================== F3.3 XUẤT BẢNG LƯƠNG RA FILE CSV ================== */
-void xuatBangLuongCSV(DanhSachNV *d) {
-    int thang, nam, i;
-    char tenFile[50];
-    FILE *f;
-    NhanVien *nv;
-    double donGiaGio, luongOT;
-    float soCong, gioOT;
-
-    printf("\n----- XUAT BANG LUONG RA FILE CSV -----\n");
-    if (d->soLuong == 0) {
-        printf("=> Danh sach nhan vien dang rong!\n");
-        return;
-    }
-    nhapThangNam(&thang, &nam);
-
-    snprintf(tenFile, sizeof(tenFile), "bangluong_%02d_%04d.csv", thang, nam);
-    f = fopen(tenFile, "w");
-    if (f == NULL) {
-        printf("=> Khong tao duoc file %s!\n", tenFile);
-        return;
-    }
-
-    /* 3 byte BOM để Excel hiểu file là UTF-8 */
-    fprintf(f, "\xEF\xBB\xBF");
-    fprintf(f, "MaNV,HoTen,PhongBan,SoCong,GioOT,LuongCoBan,PhuCap,LuongOT,ThucNhan\n");
-    for (i = 0; i < d->soLuong; i++) {
-        nv = &d->ds[i];
-        soCong = demCongThang(nv->dsChamCong, thang, nam);
-        gioOT = tongOTThang(nv->dsChamCong, thang, nam);
-        donGiaGio = nv->luongCoBan / CONG_CHUAN / GIO_CHUAN;
-        luongOT = donGiaGio * HE_SO_OT * gioOT;
-        /* Họ tên và phòng ban đặt trong dấu ngoặc kép phòng trường hợp có dấu phẩy */
-        fprintf(f, "%s,\"%s\",\"%s\",%.2f,%.2f,%.0f,%.0f,%.0f,%.0f\n",
-                nv->maNV, nv->hoTen, nv->phongBan, soCong, gioOT,
-                nv->luongCoBan, nv->phuCap, luongOT, tinhLuong(nv, thang, nam));
-    }
-    fclose(f);
-    printf("=> Da xuat bang luong ra file %s\n", tenFile);
+    printf("--------------------------------------------------------------------------------\n");
+    printf("%-66s %14.0f\n", "TONG CONG", tong);
 }

@@ -1,6 +1,6 @@
 /*
  * thongke.h
- * Các hàm ĐỆ QUY tính giờ công và các chức năng thống kê theo tháng.
+ * Các hàm ĐỆ QUY tính giờ công và thống kê giờ công theo tháng.
  */
 #ifndef THONGKE_H
 #define THONGKE_H
@@ -11,12 +11,8 @@
 float tongGioThang(ChamCong *p, int thang, int nam);
 float tongOTThang(ChamCong *p, int thang, int nam);
 float demCongThang(ChamCong *p, int thang, int nam);
-int   demNghiKhongPhep(ChamCong *p, int thang, int nam);
-float gioLuyKe(ChamCong *p, Ngay den);
 
 /* Chức năng trên menu */
 void thongKeGioCong(DanhSachNV *d);   /* F4.1 */
-void thongKeQuyLuong(DanhSachNV *d);  /* F4.2 */
-void thongKeThieuCong(DanhSachNV *d); /* F4.3 */
 
 #endif

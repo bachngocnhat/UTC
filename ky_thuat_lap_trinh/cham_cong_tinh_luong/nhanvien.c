@@ -92,14 +92,14 @@ int chonNV(DanhSachNV *d) {
 }
 
 void inTieuDeNV(void) {
-    printf("%-4s %-8s %-25s %-15s %-15s %12s %10s\n",
-           "STT", "Ma NV", "Ho ten", "Phong ban", "Chuc vu", "Luong CB", "Phu cap");
-    printf("------------------------------------------------------------------------------------------------\n");
+    printf("%-4s %-8s %-25s %-15s %-15s %12s\n",
+           "STT", "Ma NV", "Ho ten", "Phong ban", "Chuc vu", "Luong CB");
+    printf("-------------------------------------------------------------------------------------\n");
 }
 
 void inMotNV(int stt, NhanVien *nv) {
-    printf("%-4d %-8s %-25s %-15s %-15s %12.0f %10.0f\n",
-           stt, nv->maNV, nv->hoTen, nv->phongBan, nv->chucVu, nv->luongCoBan, nv->phuCap);
+    printf("%-4d %-8s %-25s %-15s %-15s %12.0f\n",
+           stt, nv->maNV, nv->hoTen, nv->phongBan, nv->chucVu, nv->luongCoBan);
 }
 
 /* ================== F1.1 THÊM NHÂN VIÊN ================== */
@@ -120,8 +120,7 @@ void themNV(DanhSachNV *d) {
     nhapChuoi("Ho ten: ", nv.hoTen, sizeof(nv.hoTen));
     nhapChuoi("Phong ban: ", nv.phongBan, sizeof(nv.phongBan));
     nhapChuoi("Chuc vu: ", nv.chucVu, sizeof(nv.chucVu));
-    nv.luongCoBan = nhapSoThuc("Luong co ban (VND): ", 1);
-    nv.phuCap = nhapSoThuc("Phu cap (VND): ", 0);
+    nv.luongCoBan = nhapSoThuc("Luong co ban (VND): ", 1, 1000000000);
     nv.dsChamCong = NULL;   /* nhân viên mới chưa có chấm công */
 
     if (themNVVaoDS(d, nv)) {
@@ -161,15 +160,13 @@ void suaNV(DanhSachNV *d) {
         printf("2. Sua phong ban\n");
         printf("3. Sua chuc vu\n");
         printf("4. Sua luong co ban\n");
-        printf("5. Sua phu cap\n");
         printf("0. Xong\n");
-        chon = nhapSoNguyen("Chon: ", 0, 5);
+        chon = nhapSoNguyen("Chon: ", 0, 4);
         switch (chon) {
             case 1: nhapChuoi("Ho ten moi: ", nv->hoTen, sizeof(nv->hoTen)); break;
             case 2: nhapChuoi("Phong ban moi: ", nv->phongBan, sizeof(nv->phongBan)); break;
             case 3: nhapChuoi("Chuc vu moi: ", nv->chucVu, sizeof(nv->chucVu)); break;
-            case 4: nv->luongCoBan = nhapSoThuc("Luong co ban moi: ", 1); break;
-            case 5: nv->phuCap = nhapSoThuc("Phu cap moi: ", 0); break;
+            case 4: nv->luongCoBan = nhapSoThuc("Luong co ban moi: ", 1, 1000000000); break;
         }
         if (chon != 0) printf("=> Da cap nhat!\n");
     } while (chon != 0);
@@ -199,83 +196,4 @@ void xoaNV(DanhSachNV *d) {
     }
     d->soLuong--;
     printf("=> Da xoa nhan vien!\n");
-}
-
-/* ================== F1.5 TÌM KIẾM ================== */
-void timKiemNV(DanhSachNV *d) {
-    int chon, i, dem;
-    char tuKhoa[50];
-    char tenThuong[50];
-
-    printf("\n----- TIM KIEM NHAN VIEN -----\n");
-    if (d->soLuong == 0) {
-        printf("=> Danh sach nhan vien dang rong!\n");
-        return;
-    }
-    printf("1. Tim theo ma nhan vien\n");
-    printf("2. Tim theo ten (chi can go mot phan cua ten)\n");
-    chon = nhapSoNguyen("Chon: ", 1, 2);
-
-    if (chon == 1) {
-        int viTri = chonNV(d);
-        if (viTri != -1) {
-            inTieuDeNV();
-            inMotNV(viTri + 1, &d->ds[viTri]);
-        }
-        return;
-    }
-
-    /* Tìm theo tên: đổi cả 2 chuỗi về chữ thường rồi dùng strstr */
-    nhapChuoi("Nhap ten can tim: ", tuKhoa, sizeof(tuKhoa));
-    chuThuong(tuKhoa);
-    dem = 0;
-    for (i = 0; i < d->soLuong; i++) {
-        strcpy(tenThuong, d->ds[i].hoTen);
-        chuThuong(tenThuong);
-        if (strstr(tenThuong, tuKhoa) != NULL) {
-            if (dem == 0) inTieuDeNV();
-            inMotNV(i + 1, &d->ds[i]);
-            dem++;
-        }
-    }
-    if (dem == 0) printf("=> Khong tim thay nhan vien nao!\n");
-    else printf("=> Tim thay %d nhan vien.\n", dem);
-}
-
-/* ================== F1.6 SẮP XẾP ================== */
-
-/* Trả về 1 nếu a phải đứng sau b (tức là cần đổi chỗ) */
-int canDoiCho(NhanVien *a, NhanVien *b, int tieuChi) {
-    if (tieuChi == 1) return strcmp(a->maNV, b->maNV) > 0;
-    if (tieuChi == 2) return strcmp(a->hoTen, b->hoTen) > 0;
-    return a->luongCoBan > b->luongCoBan;
-}
-
-/* Sắp xếp nổi bọt (bubble sort) */
-void sapXepNV(DanhSachNV *d) {
-    int tieuChi, i, j;
-    NhanVien tam;
-
-    printf("\n----- SAP XEP DANH SACH -----\n");
-    if (d->soLuong == 0) {
-        printf("=> Danh sach nhan vien dang rong!\n");
-        return;
-    }
-    printf("1. Theo ma nhan vien\n");
-    printf("2. Theo ho ten\n");
-    printf("3. Theo luong co ban\n");
-    tieuChi = nhapSoNguyen("Chon: ", 1, 3);
-
-    for (i = 0; i < d->soLuong - 1; i++) {
-        for (j = 0; j < d->soLuong - 1 - i; j++) {
-            if (canDoiCho(&d->ds[j], &d->ds[j + 1], tieuChi)) {
-                /* Đổi chỗ cả struct, con trỏ dsChamCong đi theo nên không bị mất */
-                tam = d->ds[j];
-                d->ds[j] = d->ds[j + 1];
-                d->ds[j + 1] = tam;
-            }
-        }
-    }
-    printf("=> Da sap xep!\n");
-    hienThiDS(d);
 }

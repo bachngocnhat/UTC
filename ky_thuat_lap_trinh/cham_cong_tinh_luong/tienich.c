@@ -34,14 +34,6 @@ void chuHoa(char *s) {
     }
 }
 
-/* Đổi chuỗi sang chữ thường */
-void chuThuong(char *s) {
-    int i;
-    for (i = 0; s[i] != '\0'; i++) {
-        s[i] = tolower((unsigned char)s[i]);
-    }
-}
-
 /* ================== NHẬP DỮ LIỆU ================== */
 
 /* Đọc 1 dòng từ bàn phím vào s */
@@ -95,8 +87,8 @@ int nhapSoNguyen(const char *loiNhac, int min, int max) {
     }
 }
 
-/* Nhập số thực >= min */
-double nhapSoThuc(const char *loiNhac, double min) {
+/* Nhập số thực trong khoảng [min, max] */
+double nhapSoThuc(const char *loiNhac, double min, double max) {
     char buf[100];
     double x;
     char thua;
@@ -105,8 +97,8 @@ double nhapSoThuc(const char *loiNhac, double min) {
         docDong(buf, sizeof(buf));
         if (sscanf(buf, "%lf %c", &x, &thua) != 1) {
             printf("  -> Vui long nhap mot so!\n");
-        } else if (x < min) {
-            printf("  -> Vui long nhap so >= %.0f!\n", min);
+        } else if (x < min || x > max) {
+            printf("  -> Vui long nhap so tu %.0f den %.0f!\n", min, max);
         } else {
             return x;
         }
@@ -190,41 +182,4 @@ Ngay nhapNgay(const char *loiNhac) {
 void nhapThangNam(int *thang, int *nam) {
     *thang = nhapSoNguyen("Nhap thang (1-12): ", 1, 12);
     *nam = nhapSoNguyen("Nhap nam: ", 1900, 2100);
-}
-
-/* ================== GIỜ PHÚT ================== */
-
-/* Nhập giờ dạng HH:MM, trả về số phút tính từ 00:00 */
-int nhapGio(const char *loiNhac) {
-    char buf[50];
-    char thua;
-    int gio, phut;
-    while (1) {
-        printf("%s", loiNhac);
-        docDong(buf, sizeof(buf));
-        if (sscanf(buf, "%d:%d %c", &gio, &phut, &thua) != 2) {
-            printf("  -> Sai dinh dang! Vi du dung: 08:30\n");
-        } else if (gio < 0 || gio > 23 || phut < 0 || phut > 59) {
-            printf("  -> Gio phai tu 00:00 den 23:59!\n");
-        } else {
-            return gio * 60 + phut;
-        }
-    }
-}
-
-/* Đổi số phút thành chuỗi "HH:MM". Nếu phut < 0 thì ghi "--:--" */
-void doiGioRaChuoi(int phut, char *s) {
-    if (phut < 0) {
-        strcpy(s, "--:--");
-    } else {
-        snprintf(s, 6, "%02d:%02d", phut / 60, phut % 60);
-    }
-}
-
-/* Đọc chuỗi "HH:MM" thành số phút. Trả về -1 nếu không đọc được */
-int docGioTuChuoi(const char *s) {
-    int gio, phut;
-    if (sscanf(s, "%d:%d", &gio, &phut) != 2) return -1;
-    if (gio < 0 || gio > 23 || phut < 0 || phut > 59) return -1;
-    return gio * 60 + phut;
 }

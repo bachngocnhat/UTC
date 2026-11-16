@@ -9,10 +9,10 @@
 
 Hãy tưởng tượng bạn là nhân viên phòng nhân sự của một công ty nhỏ. Mỗi tháng bạn phải:
 
-1. Giữ **sổ danh sách nhân viên** (mã, tên, phòng ban, lương cơ bản, phụ cấp).
-2. Mỗi ngày ghi **sổ chấm công**: ai đi làm, giờ vào, giờ ra, ai nghỉ phép, ai nghỉ không phép.
-3. Cuối tháng **tính lương** dựa vào số ngày công và số giờ làm thêm.
-4. Làm **báo cáo thống kê**: ai làm nhiều, ai thiếu công, công ty phải trả tổng bao nhiêu tiền lương.
+1. Giữ **sổ danh sách nhân viên** (mã, tên, phòng ban, chức vụ, lương cơ bản).
+2. Mỗi ngày ghi **sổ chấm công**: hôm nay ai làm bao nhiêu giờ, có làm thêm giờ không.
+3. Cuối tháng **tính lương** dựa vào số công và số giờ làm thêm.
+4. Làm **báo cáo thống kê giờ công** của từng người trong tháng.
 5. **Cất sổ** vào tủ (lưu file) để hôm sau mở ra dùng tiếp.
 
 Chương trình này làm thay tất cả việc trên. Người dùng chỉ việc gõ số để chọn chức năng trên **menu** hiện ra trong cửa sổ đen (console / terminal).
@@ -22,15 +22,27 @@ Chương trình này làm thay tất cả việc trên. Người dùng chỉ vi�
   QUAN LY CHAM CONG & TINH LUONG
 =======================================
 1. Quan ly nhan vien
-2. Cham cong
+2. Cham cong theo ngay
 3. Tinh luong
-4. Thong ke
+4. Thong ke gio cong theo thang
 5. Tep du lieu
 0. Thoat
 ```
 
 **Câu nói 1 dòng khi được hỏi "dự án của em làm gì?":**
-> "Đây là chương trình C chạy trên console giúp quản lý nhân viên, chấm công theo từng ngày, tự tính giờ làm, giờ làm thêm, tính lương cuối tháng, thống kê và lưu dữ liệu ra file."
+> "Đây là chương trình C chạy trên console giúp quản lý nhân viên, chấm công theo từng ngày, tính lương theo số công và giờ làm thêm, thống kê giờ công theo tháng và lưu dữ liệu ra file."
+
+### Danh sách chức năng (11 chức năng)
+
+| Nhóm | Chức năng | Loại |
+|---|---|---|
+| Nhân viên | Thêm, Hiển thị | Bắt buộc |
+| Nhân viên | Sửa, Xoá | Mở rộng |
+| Chấm công | Chấm công theo ngày | Bắt buộc |
+| Lương | Lương 1 nhân viên, Bảng lương tháng | Bắt buộc |
+| Thống kê | Giờ công theo tháng (đệ quy) | Bắt buộc |
+| File | Lưu, Đọc | Bắt buộc |
+| File | Nạp dữ liệu mẫu | Mở rộng |
 
 ---
 
@@ -84,7 +96,6 @@ typedef struct {
     char   phongBan[30];
     char   chucVu[30];
     double luongCoBan;
-    double phuCap;
     ChamCong *dsChamCong;  // "sợi dây" nối tới sổ chấm công của người này
 } NhanVien;
 ```
@@ -124,10 +135,10 @@ Mỗi ngày chấm công là **một toa tàu**. Mỗi toa chứa thông tin ng�
 dsChamCong
     │
     ▼
-[01/10 | 8h] ──► [02/10 | 8h] ──► [05/10 | 10h] ──► NULL
+[01/10 | 8h] ──► [02/10 | 8h] ──► [05/10 | 8h + 2h OT] ──► NULL
 ```
 
-- **Ưu điểm so với mảng:** thêm hay bớt một toa ở giữa chỉ cần **tháo móc và móc lại**, không phải dời cả đoàn.
+- **Ưu điểm so với mảng:** thêm một toa vào giữa chỉ cần **tháo móc và móc lại**, không phải dời cả đoàn; không cần biết trước có bao nhiêu toa.
 - **Nhược điểm:** muốn tới toa thứ 10 phải đi qua 9 toa trước (không nhảy thẳng như mảng).
 
 ### 2.9. Đệ quy – "hàm tự gọi lại chính nó"
@@ -162,12 +173,12 @@ Dữ liệu trong bộ nhớ sẽ **mất khi tắt chương trình**. Muốn gi
 
 | File | Vai trò (ví dụ đời thường) |
 |---|---|
-| `kieudulieu.h` | **Mẫu các tờ phiếu**: định nghĩa struct `Ngay`, `ChamCong`, `NhanVien`, `DanhSachNV` và các hằng số (26 công, 8 giờ, hệ số 1.5) |
-| `tienich.c/.h` | **Hộp đồ nghề**: nhập số/chữ an toàn, kiểm tra ngày hợp lệ, đổi giờ HH:MM ↔ phút |
-| `nhanvien.c/.h` | **Sổ nhân viên**: thêm, hiển thị, sửa, xoá, tìm, sắp xếp |
-| `chamcong.c/.h` | **Sổ chấm công**: đoàn tàu chấm công của từng người, tính giờ làm |
-| `thongke.c/.h` | **Các hàm đệ quy** tính tổng giờ, số công + báo cáo thống kê |
-| `luong.c/.h` | **Phòng kế toán**: tính lương, in bảng lương, xuất file CSV |
+| `kieudulieu.h` | **Mẫu các tờ phiếu**: định nghĩa struct `Ngay`, `ChamCong`, `NhanVien`, `DanhSachNV` và các hằng số (26 công, 8 giờ, hệ số 1.5, tối đa 16 giờ OT) |
+| `tienich.c/.h` | **Hộp đồ nghề**: nhập số/chữ an toàn, kiểm tra ngày hợp lệ, so sánh ngày |
+| `nhanvien.c/.h` | **Sổ nhân viên**: thêm, hiển thị, sửa, xoá |
+| `chamcong.c/.h` | **Sổ chấm công**: đoàn tàu chấm công của từng người, chấm công theo ngày |
+| `thongke.c/.h` | **Các hàm đệ quy** tính tổng giờ, giờ OT, số công + thống kê giờ công tháng |
+| `luong.c/.h` | **Phòng kế toán**: tính lương, phiếu lương, bảng lương |
 | `tepdulieu.c/.h` | **Tủ hồ sơ**: lưu/đọc file `dulieu.txt`, nạp dữ liệu mẫu |
 | `main.c` | **Lễ tân**: hiện menu, hỏi người dùng muốn gì rồi gọi đúng hàm |
 
@@ -176,7 +187,7 @@ Luồng gọi nhau:
 ```
 main.c  ──gọi──►  nhanvien.c / chamcong.c / luong.c / thongke.c / tepdulieu.c
                          │
-                         └──tất cả đều dùng──►  tienich.c (nhập liệu, ngày giờ)
+                         └──tất cả đều dùng──►  tienich.c (nhập liệu, ngày tháng)
 ```
 
 ---
@@ -204,10 +215,7 @@ typedef struct {            // Một ngày
 
 typedef struct ChamCong {   // Một toa tàu = một ngày chấm công
     Ngay  ngay;
-    int   loai;             // 0 = đi làm, 1 = nghỉ phép, 2 = nghỉ không phép
-    int   gioVao;           // lưu bằng SỐ PHÚT tính từ 0h. VD 08:30 = 510
-    int   gioRa;            // -1 nếu là ngày nghỉ
-    float gioLam;           // giờ làm chính, tối đa 8
+    float gioLam;           // giờ làm chính trong ngày (0.5 - 8)
     float gioThem;          // giờ làm thêm (OT)
     struct ChamCong *next;  // cái móc nối sang toa sau
 } ChamCong;
@@ -219,11 +227,9 @@ typedef struct {            // Danh sách nhân viên
 } DanhSachNV;
 ```
 
-**Vì sao giờ lưu bằng số phút?** Vì trừ hai số nguyên rất dễ: ra 17:00 (1020) – vào 08:00 (480) = 540 phút = 9 giờ. Nếu lưu dạng chữ "08:00" thì không trừ được.
-
 **Vì sao nhân viên dùng mảng, chấm công dùng danh sách liên kết?**
-- Nhân viên: hay **tra cứu, sắp xếp, in danh sách** → mảng tiện hơn (`ds[i]`).
-- Chấm công: hay **chèn ngày mới vào giữa, xoá một ngày** → danh sách liên kết tiện hơn. Và đề bài yêu cầu như vậy.
+- Nhân viên: hay **tra cứu theo mã, in danh sách** → mảng tiện hơn (`ds[i]`).
+- Chấm công: số ngày không biết trước, cần **chèn ngày mới vào đúng vị trí** → danh sách liên kết tiện hơn. Và đề bài yêu cầu như vậy.
 
 ---
 
@@ -239,9 +245,12 @@ int main(void) {
     do {
         // 3. In menu, hỏi người dùng chọn số
         chon = nhapSoNguyen("Chon: ", 0, 5);
-        switch (chon) {                  // 4. Chọn số nào thì vào menu con đó
+        switch (chon) {                  // 4. Chọn số nào thì làm việc đó
             case 1: menuNhanVien(&d); break;
-            ...
+            case 2: chamCongTheoNgay(&d); tamDung(); break;
+            case 3: menuLuong(&d); break;
+            case 4: thongKeGioCong(&d); tamDung(); break;
+            case 5: menuFile(&d); break;
         }
     } while (chon != 0);                 // 5. Lặp lại cho tới khi chọn 0
     if (hoiCoKhong("Luu du lieu ...")) luuTep(&d, TEN_FILE); // 6. Hỏi lưu
@@ -253,6 +262,7 @@ int main(void) {
 - `do { ... } while (chon != 0);` = "làm ít nhất 1 lần, rồi lặp lại khi chưa chọn 0".
 - `switch` = "rẽ nhánh theo giá trị": chọn 1 đi đường 1, chọn 2 đi đường 2...
 - `&d` = **địa chỉ** của d, để các hàm con sửa được danh sách thật.
+- Menu 1, 3, 5 có menu con (`menuNhanVien`, `menuLuong`, `menuFile`) viết cùng kiểu `do … while` + `switch`.
 
 ### 5.2. Nhập liệu an toàn – `nhapSoNguyen` (tienich.c)
 
@@ -277,7 +287,7 @@ int nhapSoNguyen(const char *loiNhac, int min, int max) {
 - `sscanf(buf, "%d %c", ...)` cố đọc **1 số rồi 1 ký tự**. Nếu chỉ đọc được đúng 1 thứ (là số) thì dòng nhập sạch. Nếu gõ `12abc` thì đọc được 2 thứ → báo lỗi. Gõ `abc` thì đọc được 0 thứ → báo lỗi.
 - **Vì sao dùng `fgets` (trong `docDong`) mà không dùng `scanf`?** `scanf` để lại ký tự Enter trong bộ đệm, làm lần nhập sau bị "trôi" (bỏ qua). `fgets` đọc trọn cả dòng nên không bị lỗi này.
 
-Tương tự có `nhapSoThuc`, `nhapChuoi`, `nhapNgay` (dd/mm/yyyy), `nhapGio` (HH:MM), `hoiCoKhong` (y/n).
+Tương tự có `nhapSoThuc` (số thập phân trong khoảng min–max), `nhapChuoi`, `nhapNgay` (dd/mm/yyyy), `nhapThangNam`, `hoiCoKhong` (y/n).
 
 ### 5.3. Kiểm tra ngày hợp lệ – `ngayHopLe` (tienich.c)
 
@@ -317,7 +327,13 @@ int themNVVaoDS(DanhSachNV *d, NhanVien nv) {
 - `sizeof(NhanVien)` = một nhân viên chiếm bao nhiêu byte bộ nhớ.
 - Mã NV được đổi sang **chữ hoa** (`chuHoa`) nên gõ `nv001` hay `NV001` đều như nhau.
 
-### 5.5. Xoá nhân viên – `xoaNV` (nhanvien.c)
+### 5.5. Sửa nhân viên – `suaNV` (nhanvien.c)
+
+- Hỏi mã NV (`chonNV`), lấy địa chỉ nhân viên đó: `nv = &d->ds[viTri];`
+- Hiện một menu nhỏ: 1. họ tên, 2. phòng ban, 3. chức vụ, 4. lương cơ bản, 0. xong.
+- Vì `nv` là **con trỏ** tới nhân viên thật trong mảng, gán `nv->luongCoBan = ...` là sửa luôn dữ liệu gốc.
+
+### 5.6. Xoá nhân viên – `xoaNV` (nhanvien.c)
 
 ```c
 giaiPhongCC(d->ds[viTri].dsChamCong);       // 1. trả bộ nhớ đoàn tàu chấm công
@@ -327,58 +343,29 @@ for (i = viTri; i < d->soLuong - 1; i++) {   // 2. dồn những người phía 
 d->soLuong--;                                // 3. bớt 1 người
 ```
 
-Giống xếp hàng: một người rời hàng thì những người phía sau bước lên một bước.
+Giống xếp hàng: một người rời hàng thì những người phía sau bước lên một bước. Trước khi xoá chương trình hỏi xác nhận `(y/n)`.
 
-### 5.6. Tìm kiếm theo tên – `timKiemNV` (nhanvien.c)
-
-- Đổi cả **tên** và **từ khoá** về chữ thường (`chuThuong`) để `"AN"` và `"an"` như nhau.
-- `strstr(ten, tuKhoa)` = "trong tên có chứa từ khoá không?". Có thì trả về vị trí, không thì `NULL`.
-- Ví dụ tìm `van` sẽ ra Nguyen **Van** An, Le **Van** Cuong...
-
-### 5.7. Sắp xếp – sắp xếp nổi bọt (bubble sort) trong `sapXepNV`
+### 5.7. Chấm công theo ngày – `chamCongTheoNgay` (chamcong.c)
 
 ```c
-for (i = 0; i < n - 1; i++)
-    for (j = 0; j < n - 1 - i; j++)
-        if (canDoiCho(&ds[j], &ds[j + 1], tieuChi)) {
-            tam = ds[j]; ds[j] = ds[j + 1]; ds[j + 1] = tam;   // đổi chỗ
-        }
+n = nhapNgay("Ngay cham cong (dd/mm/yyyy): ");
+if (timChamCong(nv->dsChamCong, n) != NULL) {          // đã chấm ngày này chưa?
+    printf("=> Ngay nay da duoc cham cong!\n");
+} else {
+    gioLam = nhapSoThuc("So gio lam trong ngay (0.5 - 8): ", 0.5, GIO_CHUAN);
+    gioThem = 0;
+    if (gioLam == GIO_CHUAN) {                          // chỉ làm đủ 8 giờ mới hỏi OT
+        gioThem = nhapSoThuc("So gio lam them (0 - 16): ", 0, GIO_OT_TOI_DA);
+    }
+    c = taoChamCong(n, gioLam, gioThem);                // malloc 1 toa mới
+    chenChamCong(&nv->dsChamCong, c);                   // móc toa vào đúng chỗ
+}
 ```
 
-**Ý tưởng:** đi từ đầu tới cuối, so **hai người đứng cạnh nhau**, ai lớn hơn thì đổi chỗ ra sau. Sau mỗi lượt, người lớn nhất "nổi" về cuối hàng (như bọt khí nổi lên mặt nước). Lặp lại cho tới khi cả hàng đúng thứ tự.
+- Quy tắc: **chưa làm đủ 8 giờ thì không có giờ làm thêm** (hợp lý với thực tế).
+- Vòng `do … while (hoiCoKhong("Cham cong tiep ..."))` cho phép chấm nhiều ngày liên tiếp cho cùng một người.
 
-- `tam` là biến tạm: muốn đổi nước 2 cốc phải có cốc thứ 3.
-- Khi đổi chỗ cả struct, con trỏ `dsChamCong` đi theo nên sổ chấm công không bị lẫn.
-- `canDoiCho` quyết định tiêu chí: theo mã, theo tên (`strcmp`), hay theo lương.
-
-### 5.8. Tính giờ làm 1 ngày – `tinhGio` (chamcong.c)
-
-```c
-tongPhut = gioRa - gioVao;                    // VD: 1020 - 480 = 540 phút
-
-// Trừ giờ nghỉ trưa 12:00-13:00, chỉ trừ phần nằm trong giờ làm
-batDauTrua = 720;  ketThucTrua = 780;          // 12:00 và 13:00 tính bằng phút
-if (gioVao > batDauTrua) batDauTrua = gioVao;
-if (gioRa  < ketThucTrua) ketThucTrua = gioRa;
-if (ketThucTrua > batDauTrua) tongPhut -= (ketThucTrua - batDauTrua);
-
-tongGio = tongPhut / 60.0;                    // 480 / 60 = 8 giờ
-if (tongGio > 8) { gioLam = 8; gioThem = tongGio - 8; }
-else             { gioLam = tongGio; gioThem = 0; }
-```
-
-Ví dụ:
-
-| Vào – Ra | Có mặt | Trừ trưa | Giờ làm | Giờ OT |
-|---|---|---|---|---|
-| 08:00 – 17:00 | 9h | 1h | 8 | 0 |
-| 08:00 – 19:00 | 11h | 1h | 8 | 2 |
-| 08:00 – 12:00 | 4h | 0h (không qua trưa) | 4 | 0 |
-| 13:30 – 17:00 | 3.5h | 0h | 3.5 | 0 |
-
-`60.0` (có `.0`) để phép chia ra số thập phân. Nếu viết `60` thì `450/60 = 7` (mất phần lẻ).
-
-### 5.9. Chấm công – chèn vào đoàn tàu đúng thứ tự – `chenChamCong` (chamcong.c)
+### 5.8. Chèn vào đoàn tàu đúng thứ tự – `chenChamCong` (chamcong.c)
 
 ```c
 void chenChamCong(ChamCong **head, ChamCong *moi) {
@@ -410,29 +397,7 @@ Bước 2: [02].next = [03]   [02] ──► [03] ──► [05] ──► NULL
 
 **Vì sao `ChamCong **head` (hai dấu sao)?** Ở TH1 ta phải **đổi toa đầu tàu**. Muốn hàm sửa được biến `dsChamCong` của nhân viên thì phải đưa **địa chỉ của biến đó** – tức là "địa chỉ của một địa chỉ" → hai dấu sao.
 
-Trước khi chèn, hàm `chamCongTheoNgay` đã dùng `timChamCong` kiểm tra ngày đó đã chấm chưa, nên không bao giờ có 2 toa cùng ngày.
-
-### 5.10. Xoá một ngày chấm công – `xoaChamCong` (chamcong.c)
-
-```c
-ChamCong *truoc = NULL, *p = *head;
-while (p != NULL && soSanhNgay(p->ngay, n) != 0) {  // tìm toa cần xoá
-    truoc = p;
-    p = p->next;
-}
-if (p == NULL) return 0;                 // không tìm thấy
-if (truoc == NULL) *head = p->next;      // xoá toa đầu
-else truoc->next = p->next;              // toa trước móc thẳng sang toa sau
-free(p);                                 // trả bộ nhớ toa bị xoá
-```
-
-```
-Xoá [03]:   [02] ──► [03] ──► [05]
-            truoc     p
-Sau:        [02] ─────────► [05]        (free [03])
-```
-
-### 5.11. ĐỆ QUY – tổng giờ công trong tháng – `tongGioThang` (thongke.c)
+### 5.9. ĐỆ QUY – tổng giờ công lũy kế trong tháng – `tongGioThang` (thongke.c)
 
 Đây là phần đề bài **bắt buộc**, rất hay bị hỏi.
 
@@ -446,7 +411,7 @@ float tongGioThang(ChamCong *p, int thang, int nam) {
 }
 ```
 
-**Chạy tay ví dụ** – đoàn tàu có 3 toa tháng 10: 8h, 10h, 4h.
+**Chạy tay ví dụ** – đoàn tàu có 3 toa tháng 10: 8h, 10h (8 + 2 OT), 4h.
 
 ```
 tongGioThang([8h])
@@ -459,62 +424,53 @@ tongGioThang([8h])
  = 8  + 14 = 22 giờ
 ```
 
-Câu nói tóm tắt: **"Tổng giờ của cả đoàn tàu = giờ của toa đầu + tổng giờ của phần tàu còn lại. Khi hết tàu (NULL) thì tổng bằng 0."**
+Câu nói tóm tắt: **"Tổng giờ lũy kế của cả đoàn tàu = giờ của toa đầu + tổng giờ của phần tàu còn lại. Khi hết tàu (NULL) thì tổng bằng 0."**
 
-Các hàm đệ quy khác trong `thongke.c` viết **cùng một khuôn**:
+Hai hàm đệ quy khác trong `thongke.c` viết **cùng một khuôn**, dùng để tính lương:
 
-| Hàm | Mỗi toa đóng góp |
+| Hàm | Mỗi toa (đúng tháng) đóng góp |
 |---|---|
 | `tongGioThang` | giờ làm + giờ OT |
 | `tongOTThang` | giờ OT |
-| `demCongThang` | đi làm: giờ làm / 8; nghỉ phép: 1; nghỉ không phép: 0 |
-| `demNghiKhongPhep` | 1 nếu là ngày nghỉ không phép |
-| `gioLuyKe` | giống `tongGioThang` nhưng **dừng sớm** khi gặp ngày lớn hơn ngày cần tính |
+| `demCongThang` | giờ làm / 8 (8h = 1 công, 4h = 0,5 công) |
 
-**`gioLuyKe` – "lũy kế":** tổng giờ từ đầu tháng **tới một ngày nào đó**. Dùng để in cột "Luy ke" trong bảng lịch sử chấm công. Vì đoàn tàu xếp theo ngày tăng dần, gặp toa có ngày lớn hơn là biết các toa sau cũng lớn hơn → dừng luôn:
+**Thống kê giờ công tháng – `thongKeGioCong`:** hỏi tháng/năm, rồi với **mỗi nhân viên** gọi 3 hàm đệ quy trên để in một dòng: số công, giờ làm, giờ OT, tổng giờ. Cuối bảng cộng dồn thành dòng TỔNG CỘNG.
 
-```c
-if (p == NULL || soSanhNgay(p->ngay, den) > 0) return 0;   // hai điều kiện dừng
-```
-
-### 5.12. Tính lương – `tinhLuong` (luong.c)
+### 5.10. Tính lương – `tinhLuong` (luong.c)
 
 ```c
 double donGiaNgay = nv->luongCoBan / CONG_CHUAN;   // lương 1 ngày công (chia 26)
 double donGiaGio  = donGiaNgay / GIO_CHUAN;        // lương 1 giờ (chia 8)
 float soCong = demCongThang(...);                  // đệ quy
 float gioOT  = tongOTThang(...);                   // đệ quy
-return donGiaNgay * soCong + donGiaGio * HE_SO_OT * gioOT + nv->phuCap;
+return donGiaNgay * soCong + donGiaGio * HE_SO_OT * gioOT;
 ```
 
-**Ví dụ NV001** (dữ liệu mẫu tháng 10/2026): lương cơ bản 7.800.000, phụ cấp 500.000, 23 công, 10 giờ OT.
+**Ví dụ NV001** (dữ liệu mẫu tháng 10/2026): lương cơ bản 7.800.000, 23 công, 10 giờ OT.
 
 ```
 donGiaNgay = 7.800.000 / 26        =   300.000
 donGiaGio  =   300.000 / 8         =    37.500
 Lương công = 300.000 × 23          = 6.900.000
 Lương OT   = 37.500 × 1,5 × 10     =   562.500
-Phụ cấp                            =   500.000
-THỰC NHẬN                          = 7.962.500 đ
+THỰC NHẬN                          = 7.462.500 đ
 ```
 
 `CONG_CHUAN`, `GIO_CHUAN`, `HE_SO_OT` là **hằng số** khai báo bằng `#define` trong `kieudulieu.h`. Muốn đổi công chuẩn từ 26 sang 22 chỉ cần sửa **1 chỗ**.
 
-### 5.13. Xuất bảng lương CSV – `xuatBangLuongCSV` (luong.c)
+- `inLuongMotNV` (menu 3 → 1): in phiếu lương chi tiết từng dòng như ví dụ trên.
+- `inBangLuong` (menu 3 → 2): in bảng lương mọi nhân viên + tổng quỹ lương cuối bảng.
 
-- CSV là file chữ, các cột cách nhau bằng dấu phẩy, mở được bằng Excel.
-- Tên file tạo theo tháng: `bangluong_10_2026.csv` (dùng `snprintf` để ghép chuỗi).
-- 3 byte `\xEF\xBB\xBF` ở đầu file (BOM) báo cho Excel biết file dùng mã UTF-8.
-
-### 5.14. Lưu file – `luuTep` (tepdulieu.c)
+### 5.11. Lưu file – `luuTep` (tepdulieu.c)
 
 File `dulieu.txt` trông như sau:
 
 ```
 15                                                  ← dòng 1: có 15 nhân viên
-NV001|Nguyen Van An|Ky thuat|Nhan vien|7800000|500000|23   ← thông tin + có 23 dòng chấm công
-01/10/2026|0|08:00|17:00                            ← ngày | loại | giờ vào | giờ ra
-02/10/2026|0|08:00|17:00
+NV001|Nguyen Van An|Ky thuat|Nhan vien|7800000|23   ← thông tin + có 23 dòng chấm công
+01/10/2026|8.00|0.00                                ← ngày | giờ làm | giờ làm thêm
+02/10/2026|8.00|0.00
+05/10/2026|8.00|2.00
 ...
 NV002|Tran Thi Binh|...
 ```
@@ -523,34 +479,34 @@ Thuật toán: in số nhân viên → với **mỗi nhân viên**: in 1 dòng t
 
 **Vì sao dùng dấu `|` mà không dùng dấu cách?** Vì họ tên có dấu cách ("Nguyen Van An"). Cũng vì vậy khi nhập chương trình **không cho gõ ký tự `|`**.
 
-### 5.15. Đọc file – `docTep` (tepdulieu.c)
+### 5.12. Đọc file – `docTep` (tepdulieu.c)
 
 ```c
-sscanf(dong, "%9[^|]|%49[^|]|%29[^|]|%29[^|]|%lf|%lf|%d",
+sscanf(dong, "%9[^|]|%49[^|]|%29[^|]|%29[^|]|%lf|%d",
        nv.maNV, nv.hoTen, nv.phongBan, nv.chucVu,
-       &nv.luongCoBan, &nv.phuCap, &soBanGhi);
+       &nv.luongCoBan, &soBanGhi);
 ```
 
 - `%49[^|]` = "đọc tối đa 49 ký tự, đọc cho tới khi gặp dấu `|`".
-- Đọc xong dòng nhân viên thì biết `soBanGhi`, đọc tiếp đúng bấy nhiêu dòng chấm công, mỗi dòng tạo 1 toa và chèn vào đoàn tàu.
-- Giờ làm và giờ OT **không lưu** trong file mà được **tính lại** từ giờ vào/ra → tránh dữ liệu bị lệch.
-- Dòng nào sai định dạng hoặc ngày không hợp lệ thì **bỏ qua** và in cảnh báo, chương trình không bị sập.
+- Đọc xong dòng nhân viên thì biết `soBanGhi`, đọc tiếp đúng bấy nhiêu dòng chấm công (`"%d/%d/%d|%f|%f"`), mỗi dòng tạo 1 toa và chèn vào đoàn tàu.
+- Dòng nào sai định dạng, ngày không hợp lệ hoặc giờ ngoài khoảng cho phép thì **bỏ qua**, chương trình không bị sập.
 
-### 5.16. Dữ liệu mẫu – `napDuLieuMau` (tepdulieu.c)
+### 5.13. Dữ liệu mẫu – `napDuLieuMau` (tepdulieu.c)
 
-Mỗi nhân viên mẫu có một **chuỗi 22 ký tự** tương ứng 22 ngày làm việc (thứ 2 – thứ 6) của tháng 10/2026:
+15 nhân viên, tháng 10/2026. Tháng này có đúng 22 ngày làm việc từ thứ 2 tới thứ 6. Mỗi nhân viên có một **chuỗi 22 ký tự**, mỗi ký tự là một ngày:
 
 | Ký tự | Nghĩa |
 |---|---|
-| `F` | đi làm đủ 08:00 – 17:00 |
-| `O` | làm thêm 08:00 – 19:00 (2h OT) |
-| `H` | nửa ngày 08:00 – 12:00 |
-| `P` | nghỉ phép |
-| `K` | nghỉ không phép |
+| `F` | làm đủ 8 giờ |
+| `O` | làm 8 giờ + 2 giờ làm thêm |
+| `H` | làm nửa ngày (4 giờ = 0,5 công) |
+| `-` | không đi làm (không tạo bản ghi) |
 
-Ví dụ NV001: `"FFOFFOFFOFFOFFOFFPFFFF"` + 1 ngày thứ 7 → 23 công, 10 giờ OT. Code dùng `switch` theo từng ký tự để tạo toa chấm công tương ứng.
+Thêm `soNgayT7` = số ngày thứ 7 đi làm thêm (mỗi ngày +1 công).
 
-### 5.17. Giải phóng bộ nhớ – `giaiPhongCC` (chamcong.c)
+Ví dụ NV001: `"FFOFFOFFOFFOFFOFFFFFFF"` + 1 ngày thứ 7 → 23 công, 10 giờ OT. Code dùng `switch` theo từng ký tự để tạo toa chấm công tương ứng.
+
+### 5.14. Giải phóng bộ nhớ – `giaiPhongCC` (chamcong.c)
 
 ```c
 while (head != NULL) {
@@ -568,28 +524,26 @@ Phải nhớ toa sau trước khi `free`, vì `free` xong thì toa đó không c
 
 | Quy tắc | Giá trị |
 |---|---|
-| Giờ làm chuẩn / ngày | 8 giờ |
-| Nghỉ trưa | 12:00 – 13:00, chỉ trừ phần nằm trong giờ làm |
-| Phần vượt 8 giờ | tính là giờ làm thêm (OT) |
+| Giờ làm trong ngày | 0,5 – 8 giờ |
+| Giờ làm thêm | 0 – 16 giờ, chỉ nhập khi làm đủ 8 giờ |
+| Số công 1 ngày | giờ làm / 8 (8h = 1 công, 4h = 0,5 công) |
 | Công chuẩn / tháng | 26 công |
 | Hệ số OT | 1,5 |
-| Nghỉ phép | vẫn tính 1 công |
-| Nghỉ không phép | 0 công |
-| Làm nửa ngày (4h) | 0,5 công |
-| Thiếu công | số công < ngưỡng nhập vào (VD 22) **hoặc** có ngày nghỉ không phép |
+| Lương | (LCB / 26) × số công + (LCB / 26 / 8) × 1,5 × giờ OT |
+| Mỗi ngày | chỉ chấm công 1 lần cho mỗi nhân viên |
 
 ---
 
 ## PHẦN 7. CÂU HỎI THƯỜNG GẶP KHI BẢO VỆ & CÁCH TRẢ LỜI
 
 **1. Đệ quy dùng ở đâu? Giải thích?**
-> Ở `thongke.c`, hàm `tongGioThang`. Điều kiện dừng: con trỏ NULL (hết danh sách) trả về 0. Bước đệ quy: lấy giờ của nút hiện tại (nếu đúng tháng) cộng với `tongGioThang(p->next)`. Ngoài ra còn `gioLuyKe`, `demCongThang`, `tongOTThang`, `demNghiKhongPhep` cùng kiểu.
+> Ở `thongke.c`, hàm `tongGioThang` tính tổng giờ công lũy kế trong tháng. Điều kiện dừng: con trỏ NULL (hết danh sách) trả về 0. Bước đệ quy: lấy giờ của nút hiện tại (nếu đúng tháng) cộng với `tongGioThang(p->next)`. Ngoài ra `tongOTThang` và `demCongThang` cũng đệ quy cùng kiểu, dùng để tính lương.
 
 **2. Đệ quy khác vòng lặp thế nào? Sao không dùng vòng lặp?**
-> Kết quả như nhau. Đệ quy hợp với danh sách liên kết vì danh sách liên kết cũng có tính đệ quy: một danh sách = nút đầu + danh sách còn lại. Nhược điểm của đệ quy là tốn bộ nhớ ngăn xếp, danh sách rất dài có thể tràn ngăn xếp; với ~31 ngày/tháng thì không vấn đề.
+> Kết quả như nhau. Đệ quy hợp với danh sách liên kết vì danh sách liên kết cũng có tính đệ quy: một danh sách = nút đầu + danh sách còn lại. Nhược điểm của đệ quy là tốn bộ nhớ ngăn xếp, danh sách rất dài có thể tràn ngăn xếp; với khoảng 31 ngày/tháng thì không vấn đề.
 
 **3. Danh sách liên kết nằm ở đâu? Sao không dùng mảng cho chấm công?**
-> Mỗi `NhanVien` có con trỏ `dsChamCong` trỏ tới nút đầu. Mỗi nút `ChamCong` có con trỏ `next`. Dùng danh sách liên kết vì số ngày chấm công không biết trước và cần chèn/xoá ở giữa mà không phải dịch chuyển phần tử.
+> Mỗi `NhanVien` có con trỏ `dsChamCong` trỏ tới nút đầu. Mỗi nút `ChamCong` có con trỏ `next`. Dùng danh sách liên kết vì số ngày chấm công không biết trước và cần chèn vào đúng vị trí theo ngày mà không phải dịch chuyển phần tử.
 
 **4. Làm sao danh sách luôn theo thứ tự ngày?**
 > Hàm `chenChamCong` không chèn vào cuối mà đi tìm vị trí đúng: dừng ở nút cuối cùng có ngày nhỏ hơn ngày mới rồi chèn vào sau nút đó. Nếu ngày mới nhỏ nhất thì chèn vào đầu.
@@ -598,31 +552,31 @@ Phải nhớ toa sau trước khi `free`, vì `free` xong thì toa đó không c
 > Vì có trường hợp phải thay đổi nút đầu danh sách. Muốn hàm sửa được con trỏ đầu thì phải truyền địa chỉ của con trỏ đó, tức con trỏ cấp 2.
 
 **6. Làm sao chống chấm công trùng ngày?**
-> Trước khi chèn, gọi `timChamCong` duyệt danh sách xem đã có ngày đó chưa. Có rồi thì báo và yêu cầu dùng chức năng Sửa.
+> Trước khi chèn, gọi `timChamCong` duyệt danh sách xem đã có ngày đó chưa. Có rồi thì báo và không chèn nữa.
 
 **7. Nhân viên lưu bằng gì? Nếu thêm quá nhiều thì sao?**
 > Mảng động cấp phát bằng `malloc`, ban đầu chứa 10. Khi đầy thì `realloc` tăng gấp đôi, nên không giới hạn số nhân viên (chỉ phụ thuộc bộ nhớ máy).
 
 **8. Rò rỉ bộ nhớ là gì? Chương trình xử lý thế nào?**
-> Là cấp phát bộ nhớ mà không trả lại. Chương trình `free` từng nút khi xoá một ngày, `free` cả danh sách chấm công khi xoá nhân viên, và `giaiPhongDS` trả toàn bộ bộ nhớ khi thoát.
+> Là cấp phát bộ nhớ mà không trả lại. Khi xoá nhân viên, chương trình `free` toàn bộ danh sách chấm công của người đó; khi thoát, `giaiPhongDS` trả toàn bộ bộ nhớ.
 
-**9. Giờ làm và giờ OT tính thế nào?**
-> Giờ ra trừ giờ vào, trừ phần trùng với giờ nghỉ trưa 12–13h. Phần ≤ 8 giờ là giờ làm chính, phần vượt 8 giờ là OT. Giờ lưu bằng số phút để trừ cho dễ.
+**9. Số công tính thế nào?**
+> Mỗi ngày được (giờ làm / 8) công: làm 8 giờ là 1 công, làm 4 giờ là 0,5 công. Số công tháng là tổng các ngày, tính bằng hàm đệ quy `demCongThang`.
 
-**10. Công thức lương?**
-> Lương = (lương cơ bản / 26) × số công + (lương cơ bản / 26 / 8) × 1,5 × giờ OT + phụ cấp. Ví dụ NV001 được 7.962.500 đ.
+**10. Tại sao làm chưa đủ 8 giờ thì không được nhập giờ làm thêm?**
+> Vì làm thêm giờ chỉ có ý nghĩa khi đã làm hết giờ chuẩn. Chương trình chỉ hỏi giờ làm thêm khi giờ làm bằng 8.
 
-**11. Nhập chữ vào chỗ cần số thì sao?**
+**11. Công thức lương?**
+> Lương = (lương cơ bản / 26) × số công + (lương cơ bản / 26 / 8) × 1,5 × giờ OT. Ví dụ NV001 được 7.462.500 đ.
+
+**12. Nhập chữ vào chỗ cần số thì sao?**
 > Mọi chỗ nhập đều qua hàm trong `tienich.c`: đọc cả dòng bằng `fgets`, tách bằng `sscanf`. Sai thì báo lỗi và bắt nhập lại, chương trình không bị treo.
 
-**12. Sao không dùng `scanf` trực tiếp?**
+**13. Sao không dùng `scanf` trực tiếp?**
 > `scanf` để lại ký tự xuống dòng trong bộ đệm, làm lần nhập sau bị bỏ qua. Dùng `fgets` đọc cả dòng rồi `sscanf` phân tích thì tránh được lỗi này và kiểm tra được dữ liệu thừa.
 
-**13. File lưu theo định dạng gì? Sao dùng dấu `|`?**
-> File văn bản `dulieu.txt`: dòng đầu là số nhân viên, mỗi nhân viên 1 dòng thông tin kèm số bản ghi, sau đó là các dòng chấm công. Dùng `|` vì họ tên có dấu cách.
-
-**14. Sắp xếp dùng thuật toán gì? Độ phức tạp?**
-> Sắp xếp nổi bọt: so sánh 2 phần tử kề nhau, sai thứ tự thì đổi chỗ. Độ phức tạp O(n²), đủ nhanh với số nhân viên của công ty nhỏ.
+**14. File lưu theo định dạng gì? Sao dùng dấu `|`?**
+> File văn bản `dulieu.txt`: dòng đầu là số nhân viên, mỗi nhân viên 1 dòng thông tin kèm số bản ghi, sau đó là các dòng chấm công `ngày|giờ làm|giờ OT`. Dùng `|` vì họ tên có dấu cách.
 
 **15. Độ phức tạp của chèn chấm công và hàm đệ quy?**
 > Đều là O(n) với n là số bản ghi chấm công của một nhân viên, vì phải duyệt dọc danh sách.
@@ -637,7 +591,7 @@ Phải nhớ toa sau trước khi `free`, vì `free` xong thì toa đó không c
 > Sửa hằng số trong `kieudulieu.h` (`HE_SO_OT`, `CONG_CHUAN`, `GIO_CHUAN`), không cần sửa chỗ nào khác.
 
 **19. Hạn chế và hướng phát triển?**
-> Chưa có hệ số OT ngày lễ/cuối tuần, chưa trừ bảo hiểm, thuế; chưa có đăng nhập. Có thể phát triển thêm các phần đó, nhập dữ liệu từ máy chấm công, dùng cơ sở dữ liệu hoặc giao diện đồ hoạ.
+> Chưa có tìm kiếm, sắp xếp nhân viên; chưa sửa/xoá được chấm công; chưa chấm công bằng giờ vào/ra và phân loại ngày nghỉ; chưa có phụ cấp, bảo hiểm, thuế; chưa xuất bảng lương ra Excel. Đây là các hướng phát triển tiếp theo.
 
 ---
 
@@ -662,4 +616,4 @@ Phải nhớ toa sau trước khi `free`, vì `free` xong thì toa đó không c
 | Đệ quy | Hàm tự gọi lại chính nó |
 | Điều kiện dừng | Trường hợp đệ quy trả lời ngay, không gọi tiếp |
 | Hằng số `#define` | Giá trị cố định đặt tên, sửa 1 chỗ đổi mọi nơi |
-| O(n), O(n²) | Cách đo thời gian chạy tăng theo số lượng dữ liệu |
+| O(n) | Thời gian chạy tăng tỉ lệ với số lượng dữ liệu |
